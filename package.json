@@ -1,0 +1,12 @@
+{
+  "name": "online-medicine-alert",
+  "version": "1.0.0",
+  "description": "Smart Online Medicine Alert & Reminder Management System",
+  "scripts": {
+    "start": "npx serve frontend -l 5000",
+    "deploy": "npx serve frontend -l 5000 --no-clipboard"
+  },
+  "dependencies": {
+    "serve": "^14.2.1"
+  }
+}
