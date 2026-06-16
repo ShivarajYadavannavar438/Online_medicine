@@ -1,26 +1,44 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKER_IMAGE = 'shivaraj438/online-medicine:latest'
+    }
+
     stages {
-        stage('Build') {
+        stage('Pull Latest Code') {
             steps {
-                sh '''
-                    ls -la
-                    ls -la frontend/ || echo "frontend folder not found at workspace root"
-                '''
+                git branch: 'main', url: 'https://github.com/ShivarajYadavannavar438/Online_medicine.git'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t ${DOCKER_IMAGE} .'
+            }
+        }
+
+        stage('Push to Docker Hub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                    sh 'docker push ${DOCKER_IMAGE}'
+                }
             }
         }
 
         stage('Deploy') {
             steps {
-                sh 'nohup npx serve frontend -l 5000 --no-clipboard > /tmp/serve.log 2>&1 &'
-                sh 'sleep 3 && echo "Website is live at http://localhost:5000"'
+                sh 'docker stop online-medicine || true'
+                sh 'docker rm online-medicine || true'
+                sh 'docker run -d --name online-medicine -p 80:80 ${DOCKER_IMAGE}'
+                echo 'Website is live at http://localhost:80'
             }
         }
     }
 
     post {
-        success { echo 'SUCCESS - Visit http://localhost:5000' }
-        failure { echo 'FAILED - Check console output' }
+        success { echo 'Deployment Successful! Visit http://localhost:80' }
+        failure { echo 'Deployment Failed!' }
     }
 }
