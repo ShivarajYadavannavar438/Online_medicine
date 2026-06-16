@@ -37,6 +37,7 @@ body {
     color: var(--text-dark);
     line-height: 1.6;
     overflow-x: hidden;
+    background-color: #f0f0f0;
 }
 
 .container {
